@@ -5,19 +5,18 @@ void initialisation(int size, float *p);
 void show(int size, float *p);
 void paste(int *size, float *p, float elem, int index);
 void removed(int *size, float *p, int index);
-void special(int *size, float *p);
-void fraction(float digit, int *z, float *f);
-int fract_integer(float f);
+void special(int *size, float *p, int *newsize, float **pp);
+int fract_integer2(float noint);
 
 int main()
 {
-    int size;
+    int size, newsize;
     printf("Введите размер массива: ");
     scanf("%d", &size);
-    float *p = (float*)malloc(size);
+    float *p = (float*)malloc(size*sizeof(float));
 
     initialisation(size, p);
-    //show(size, p);
+    show(size, p);
 
     //paste(&size, p, 0, 1);
     //show(size, p);
@@ -25,8 +24,18 @@ int main()
     //removed(&size, p, 2);
     //show(size, p);
 
-    special(&size, p);
+    float **pp;
 
+   
+
+    special(&size, p, &newsize, pp);
+
+    //printf("size=%d\n", newsize);
+    //printf("pp=%s\n", *pp);
+    show(newsize, *pp);
+
+    free(p);
+    free(*pp);
     return 0;
 }
 
@@ -72,57 +81,62 @@ void removed(int *size, float *p, int index)
     p = realloc(p, (*size) * sizeof(float));
 }
 
-void special(int *size, float *p)
+void special(int *size, float *p, int *newsize, float **pp)
 {
-    int z, f_z;
+    int z, f_z, k=0;
     float f;
-    for (int i = 0; i < (*size); ++i)
+    for (int i = 0; i < (*size); ++i) //счетаем количество нужных нам чисел
     {
         z = (int)p[i]; //целая часть
-        printf("z = %d\n", z);
-        f = p[i] - z; //дробная часть
-        f_z = fract_integer(f);
+        f_z = fract_integer2(p[i]);
         if (z < f_z)
         {
-            printf("for i=%d %d<%d", i, z, f_z);
+            //printf("for i=%d %d<%d\n", i, z, f_z);
+            k++; //счетчик количества нужных нам чисел
         }
     }
 
-}
+    *newsize = k;
+    printf("k=%d\n", k);
 
-void fraction(float digit, int *z, float *f) //выделяет из числа целую и дробную части
-{
-    printf("%f\n", digit);
-    int a = (int)digit;
-    *z = a;
-    float b = digit - (*z);
-    *f = b;
-}
 
-int fract_integer(float f) //передаем сюда дробную часть числа
-{
-    int z, integer = 0, rank = 1;
-    /*while (f != 0)
+    float* pp1 = (float*)malloc(k*sizeof(float));
+    int r = 0; //итератор по новому массиву
+    for (int i = 0; i < (*size); ++i)
     {
-        f *= 10;
-        fraction(f, &z, &f);
-        integer += z * rank;
-        rank *= 10;
-    }*/
-
-    for (int i = 0; i < 2; ++i)
-    {
-        if (f == 0){break;}
-        f *= 10;
-        fraction(f, &z, &f);
-        integer += z * rank;
-        rank *= 10;
+        z = (int)p[i]; //целая часть
+        f_z = fract_integer2(p[i]);
+        if (z < f_z)
+        {   
+            *((pp1) + r) = p[i];
+            //printf("pp1=%f\n", *(pp1+r));
+            r++;
+            removed(size, p, i);
+            i--;
+        }
     }
+    *pp = pp1;
 
-    return integer;
 }
 
 int fract_integer2(float noint) //передаем сюда дробь
 {
-    a = (int)
+    int sum = 0;
+    int rank = 1;
+    //int integer = (int)noint;
+    int frac = (int)(noint * 1000000);
+    frac = frac % 1000000;
+    int a;
+    for (int i=0; i<6; ++i)
+    {
+        a = frac % 10;
+        frac = frac / 10;
+        sum += a * rank;
+        if (a != 0)
+        {
+            rank *= 10;
+        }
+
+    }
+    return sum;
 }
