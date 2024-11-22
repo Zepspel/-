@@ -22,7 +22,7 @@ int main()
     //show(size, p);
 
     //removed(&size, p, 2);
-    //show(size, p);
+    ///show(size, p);
 
     float **pp;
 
